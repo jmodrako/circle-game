@@ -1,7 +1,8 @@
-package io.scalac.android.circlegame
+package io.scalac.android.circlegame.ui
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import io.scalac.android.circlegame.R
 
 class MainActivity : AppCompatActivity() {
 

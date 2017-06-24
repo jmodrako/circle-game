@@ -9,17 +9,21 @@ import android.widget.TextView
 import io.scalac.android.circlegame.R
 import io.scalac.android.circlegame.engine.Engine
 import io.scalac.android.circlegame.engine.EngineView
+import io.scalac.android.circlegame.engine.LevelCreator
 import io.scalac.android.circlegame.model.CircleModel
-import timber.log.Timber
 
 class MainActivity : AppCompatActivity(), EngineView {
 
-    private val engine: Engine by lazy { Engine(this) }
+    private val levelCreator by lazy { LevelCreator() }
+    private val engine: Engine by lazy {
+        Engine(engineView = this, level = levelCreator.createSimpleLevel(
+                onLevelChangedListener = this))
+    }
 
     private val container: FrameLayout by lazy { findViewById(R.id.container) as FrameLayout }
     private val level: TextView by lazy { findViewById(R.id.level) as TextView }
 
-    private val circleToViewMap: HashMap<CircleModel, View> = HashMap()
+    private val circleToViewMap: HashMap<CircleModel, View?> = HashMap()
 
     private val deviceWidth: Int by lazy { resources.displayMetrics.widthPixels }
     private val deviceHeight: Int by lazy { resources.displayMetrics.heightPixels }
@@ -35,9 +39,9 @@ class MainActivity : AppCompatActivity(), EngineView {
         engine.startEngine()
     }
 
-    override fun onStop() {
+    override fun onPause() {
         engine.stopEngine()
-        super.onStop()
+        super.onPause()
     }
 
     override fun onLevelChanged(currentLevel: Int) = runOnUiThread {
@@ -54,7 +58,7 @@ class MainActivity : AppCompatActivity(), EngineView {
             i.y = circle.y.toFloat()
             i.setOnClickListener { v ->
                 engine.onCircleClicked(circle)
-                container.removeView(v)
+                removeCircleFromView(circle)
             }
 
             circleToViewMap[circle] = i
@@ -64,10 +68,16 @@ class MainActivity : AppCompatActivity(), EngineView {
     }
 
     override fun onCircleMissed(circleModel: CircleModel) = runOnUiThread {
-        container.removeView(circleToViewMap[circleModel])
+        removeCircleFromView(circleModel)
     }
 
     override fun onLevelCompleted() = runOnUiThread {
         level.text = "Level completed!!!"
+    }
+
+    private fun removeCircleFromView(circle: CircleModel) {
+        val view = circleToViewMap[circle]
+        container.removeView(view)
+        circleToViewMap[circle] = null
     }
 }

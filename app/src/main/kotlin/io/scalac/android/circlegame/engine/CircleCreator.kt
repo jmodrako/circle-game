@@ -33,13 +33,11 @@ class CircleCreator(val deviceWidth: Int, val deviceHeight: Int) {
 
     private fun getMaxRadiusRandomPart(currentLevel: Int) = deviceWidth / 2 - getLevelMultipler(currentLevel)
 
-    private fun getRandomPart(currentLevel: Int, min: Int, max: Int): Int {
-        return max(min, random.nextInt(max - getLevelMultipler(currentLevel)))
-    }
+    private fun getRandomPart(currentLevel: Int, min: Int, max: Int): Int =
+            max(min, random.nextInt(max - getLevelMultipler(currentLevel)))
 
-    private fun getStaticPart(currentLevel: Int, min: Int, max: Int): Int {
-        return max(min, max - getLevelMultipler(currentLevel))
-    }
+    private fun getStaticPart(currentLevel: Int, min: Int, max: Int): Int =
+            max(min, max - getLevelMultipler(currentLevel))
 
     private fun getLevelMultipler(currentLevel: Int) = currentLevel * LEVEL_MULTIPLIER
 

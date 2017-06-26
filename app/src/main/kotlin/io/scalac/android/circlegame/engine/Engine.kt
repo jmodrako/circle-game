@@ -19,7 +19,6 @@ class Engine(val circleModelStorage: CircleModelStorage) : Handler.Callback {
     var points = 0
     var engineView: EngineView? = null
     var lives = LIVES
-    var gameOn = false
 
     var currentLevel: Int by Delegates.observable(1, {
         _, _, newValue ->
@@ -29,12 +28,11 @@ class Engine(val circleModelStorage: CircleModelStorage) : Handler.Callback {
         get
 
     fun startEngine() {
-        gameOn = true
+        Timber.d("startEngine ")
         workerThread = HandlerThread("engine-worker")
         workerThread.start()
 
         workerHandler = Handler(workerThread.looper, this)
-        Timber.d("startEngine ")
         workerHandler.sendEmptyMessageDelayed(SHOW_CIRCLE_MSG, 2000L)
     }
 
@@ -67,7 +65,7 @@ class Engine(val circleModelStorage: CircleModelStorage) : Handler.Callback {
     }
 
     override fun handleMessage(msg: Message?): Boolean {
-        if (msg?.what == SHOW_CIRCLE_MSG && gameOn) {
+        if (msg?.what == SHOW_CIRCLE_MSG) {
             val showNewCircleRunnable = Runnable {
                 val circleWrapper = circleModelStorage.currentCircle()
                 val currentCircleHideTime = SystemClock.uptimeMillis() + circleWrapper.sustainMs
@@ -109,7 +107,6 @@ class Engine(val circleModelStorage: CircleModelStorage) : Handler.Callback {
         engineView?.onCircleMissed(circleWrapper.circle)
         circleModelStorage.removeCircle(circleWrapper.circle)
         if (lives == 0) {
-            gameOn = false
             stopEngine()
             engineView?.onGameEnded()
         } else {

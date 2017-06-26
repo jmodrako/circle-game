@@ -4,28 +4,53 @@ import io.scalac.android.circlegame.model.CircleModel
 import java.lang.Math.max
 import java.util.*
 
-// TODO: Serek plis dodaj magic nubersy do stałych :)
 class CircleCreator(val deviceWidth: Int, val deviceHeight: Int) {
     val random = Random()
 
     fun createCircleForLevel(id: Long, currentLevel: Int): CircleModelWrapper {
         val radius = radius(currentLevel)
         val circle = CircleModel(id, radius, positionX(radius), positionY(radius))
-        val sustainMs = sustainMs(currentLevel)
-        return CircleModelWrapper(circle, sustainMs, nextDelayMs(currentLevel))
+        return CircleModelWrapper(circle, sustainMs(currentLevel), nextDelayMs(currentLevel))
     }
+
+    private fun positionX(radius: Int): Int = random.nextInt(deviceWidth - radius * 3 / 4)
+
+    private fun positionY(radius: Int): Int = random.nextInt(deviceHeight - radius * 3 / 4)
 
     private fun nextDelayMs(currentLevel: Int) = sustainMs(currentLevel)
 
-    private fun sustainMs(currentLevel: Int) = getMinValue(currentLevel) + getRandomValue(currentLevel)
+    private fun sustainMs(currentLevel: Int): Long {
+        val staticPart = getStaticPart(currentLevel, MIN_DELAY, MAX_DELAY_LEVEL_BONUS)
+        val randomPart = getRandomPart(currentLevel, 0, MAX_DELAY_RANDOM_PART)
+        return (staticPart + randomPart).toLong()
+    }
 
-    private fun getRandomValue(currentLevel: Int): Long = random.nextInt(1000 - currentLevel * 10).toLong()
+    private fun radius(currentLevel: Int): Int {
+        val staticPart = getStaticPart(currentLevel, MIN_RADIUS, MAX_RADIUS_LEVEL_BONUS)
+        val randomPart = getRandomPart(currentLevel, 0, getMaxRadiusRandomPart(currentLevel))
+        return staticPart + randomPart
+    }
 
-    private fun getMinValue(currentLevel: Int): Long = max(0, 900 - currentLevel * 10).toLong()
+    private fun getMaxRadiusRandomPart(currentLevel: Int) = deviceWidth / 2 - getLevelMultipler(currentLevel)
 
-    private fun positionX(radius: Int): Int = random.nextInt(deviceWidth - radius)
-    private fun positionY(radius: Int): Int = random.nextInt(deviceHeight - radius)
+    private fun getRandomPart(currentLevel: Int, min: Int, max: Int): Int {
+        return max(min, random.nextInt(max - getLevelMultipler(currentLevel)))
+    }
 
-    private fun radius(currentLevel: Int) = max(10, 50 - currentLevel * 10) +
-            random.nextInt(max(deviceWidth / 2, 50 - currentLevel * 10))
+    private fun getStaticPart(currentLevel: Int, min: Int, max: Int): Int {
+        return max(min, max - getLevelMultipler(currentLevel))
+    }
+
+    private fun getLevelMultipler(currentLevel: Int) = currentLevel * LEVEL_MULTIPLIER
+
+    companion object {
+        val MIN_DELAY = 100
+        val MAX_DELAY_LEVEL_BONUS = 900
+        val MAX_DELAY_RANDOM_PART = 1000
+
+        val MIN_RADIUS = 25
+        val MAX_RADIUS_LEVEL_BONUS = 50
+
+        val LEVEL_MULTIPLIER = 10
+    }
 }

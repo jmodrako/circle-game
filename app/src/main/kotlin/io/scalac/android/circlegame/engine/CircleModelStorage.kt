@@ -9,7 +9,7 @@ data class CircleModelStorage(val circleCreator: CircleCreator) {
     val circleMap = HashMap<CircleModel, CircleModelWrapper>()
 
     init {
-        levelUp(1)
+        levelUp(INITIAL_LEVEL)
     }
 
     fun levelUp(currentLevel: Int) {
@@ -33,7 +33,7 @@ data class CircleModelStorage(val circleCreator: CircleCreator) {
     fun reset() {
         circles.clear()
         circleMap.clear()
-        levelUp(1)
+        levelUp(INITIAL_LEVEL)
     }
 
     fun removeCircle(circle: CircleModel) {
@@ -42,4 +42,8 @@ data class CircleModelStorage(val circleCreator: CircleCreator) {
     }
 
     fun hasCircle(circleToShow: CircleModel) = circleMap.contains(circleToShow)
+
+    companion object {
+        val INITIAL_LEVEL = 1
+    }
 }

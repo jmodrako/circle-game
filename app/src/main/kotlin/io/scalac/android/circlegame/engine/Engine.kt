@@ -6,40 +6,52 @@ import android.os.Message
 import android.os.SystemClock
 import io.scalac.android.circlegame.model.CircleModel
 import timber.log.Timber
+import kotlin.properties.Delegates
 
-class Engine(
-        val engineView: EngineView,
-        val level: Level) : Handler.Callback {
-
+class Engine(val circleModelStorage: CircleModelStorage) : Handler.Callback {
     init {
         Timber.plant(Timber.DebugTree())
     }
 
-    private val visibleCircles = mutableSetOf<CircleModel>()
     private lateinit var workerHandler: Handler
     private lateinit var workerThread: HandlerThread
 
+    var points = 0
+    var engineView: EngineView? = null
+    var lives = LIVES
+    var gameOn = false
+
+    var currentLevel: Int by Delegates.observable(1, {
+        _, _, newValue ->
+        engineView?.onLevelChanged(newValue)
+    })
+        private set
+        get
+
     fun startEngine() {
+        gameOn = true
         workerThread = HandlerThread("engine-worker")
         workerThread.start()
 
         workerHandler = Handler(workerThread.looper, this)
+        Timber.d("startEngine ")
         workerHandler.sendEmptyMessageDelayed(SHOW_CIRCLE_MSG, 2000L)
     }
 
     fun stopEngine() {
-        level.clearLevelChangedListener()
+        Timber.d("stopEngine")
         workerThread.quitSafely()
     }
 
-
     fun onCircleClicked(circle: CircleModel) {
-        val currentCircle = level.currentCircle()
+        val currentCircle = circleModelStorage.currentCircle()
+        points += currentLevel
+        circleModelStorage.removeCircle(circle)
+        continueGame(currentCircle)
+    }
 
-        visibleCircles.remove(circle)
-        level.levelUp()
-
-        if (level.isLevelComplete()) {
+    private fun continueGame(currentCircle: CircleModelWrapper) {
+        if (circleModelStorage.isLevelComplete()) {
             onLevelCompleted()
         } else {
             workerHandler.sendEmptyMessageDelayed(SHOW_CIRCLE_MSG, currentCircle.nextDelayMs)
@@ -48,13 +60,16 @@ class Engine(
 
     private fun onLevelCompleted() {
         stopEngine()
-        engineView.onLevelCompleted()
+        currentLevel++
+        engineView?.onLevelCompleted()
+        circleModelStorage.levelUp(currentLevel)
+        startEngine()
     }
 
     override fun handleMessage(msg: Message?): Boolean {
-        if (msg?.what == SHOW_CIRCLE_MSG) {
+        if (msg?.what == SHOW_CIRCLE_MSG && gameOn) {
             val showNewCircleRunnable = Runnable {
-                val circleWrapper = level.currentCircle()
+                val circleWrapper = circleModelStorage.currentCircle()
                 val currentCircleHideTime = SystemClock.uptimeMillis() + circleWrapper.sustainMs
 
                 val currentCircle = circleWrapper.circle
@@ -68,39 +83,54 @@ class Engine(
         return true
     }
 
-    private fun scheduleHideCurrentCircle(
-            currentCircle: CircleModel,
-            circleWrapper: CircleModelWrapper,
-            currentCircleHideTime: Long) {
+    private fun scheduleHideCurrentCircle(currentCircle: CircleModel, circleWrapper: CircleModelWrapper,
+                                          currentCircleHideTime: Long) {
 
         val onCircleSustainEndRunnable = Runnable {
             if (didUserMissCircle(currentCircle)) { // User missed circle ;(
-                onCircleMissed(currentCircle)
-
-                workerHandler.sendEmptyMessageDelayed(SHOW_CIRCLE_MSG, circleWrapper.nextDelayMs)
+                onCircleMissed(circleWrapper)
             }
         }
 
         workerHandler.postAtTime(onCircleSustainEndRunnable, currentCircleHideTime)
     }
 
-    private fun didUserMissCircle(circleToShow: CircleModel) = visibleCircles.contains(circleToShow)
+    private fun didUserMissCircle(circleToShow: CircleModel) = circleModelStorage.hasCircle(circleToShow)
 
     private fun sendCircleToView(circleToShow: CircleModel) {
-        Timber.d("view.onShowCircle: ${level.currentLevel}")
-
-        visibleCircles.add(circleToShow)
-        engineView.onShowCircle(circleToShow)
+        Timber.d("view.onShowCircle: $circleToShow")
+        engineView?.onShowCircle(circleToShow)
     }
 
-    private fun onCircleMissed(circleToShow: CircleModel) {
-        engineView.onCircleMissed(circleToShow)
-        visibleCircles.remove(circleToShow)
-
-        level.levelDown()
+    private fun onCircleMissed(circleWrapper: CircleModelWrapper) {
+        Timber.d("onCircleMissed " + lives)
+        points--
+        lives--
+        engineView?.onCircleMissed(circleWrapper.circle)
+        circleModelStorage.removeCircle(circleWrapper.circle)
+        if (lives == 0) {
+            gameOn = false
+            stopEngine()
+            engineView?.onGameEnded()
+        } else {
+            workerHandler.sendEmptyMessageDelayed(SHOW_CIRCLE_MSG, circleWrapper.nextDelayMs)
+            if (circleModelStorage.isLevelComplete()) {
+                onLevelCompleted()
+            }
+        }
     }
 
     companion object {
         private val SHOW_CIRCLE_MSG = 23
+        private val LIVES = 5
+    }
+
+    fun reset() {
+        lives = LIVES
+        points = 0
+        currentLevel = 1
+        circleModelStorage.reset()
+        startEngine()
+        engineView?.onGameStarted()
     }
 }

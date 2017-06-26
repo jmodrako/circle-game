@@ -4,6 +4,7 @@ import io.scalac.android.circlegame.model.CircleModel
 import timber.log.Timber
 
 data class CircleModelStorage(val circleCreator: CircleCreator) {
+
     val circles = ArrayList<CircleModelWrapper>()
     val circleMap = HashMap<CircleModel, CircleModelWrapper>()
 
@@ -16,20 +17,16 @@ data class CircleModelStorage(val circleCreator: CircleCreator) {
         generateCircles(currentLevel, getNumberOfCircles(currentLevel))
     }
 
-    private fun generateCircles(currentLevel: Int, numberOfCircles: Int) {
-        (0..numberOfCircles).mapTo(circles) {
-            val circle = circleCreator.createCircleForLevel(it.toLong(), currentLevel)
-            circleMap.put(circle.circle, circle)
-            Timber.d("added circle: " + circle.toString())
-            circle
-        }
+    private fun generateCircles(currentLevel: Int, numberOfCircles: Int) = (0..numberOfCircles).mapTo(circles) {
+        val circle = circleCreator.createCircleForLevel(it.toLong(), currentLevel)
+        circleMap.put(circle.circle, circle)
+        Timber.d("added circle: " + circle.toString())
+        circle
     }
 
-    private fun getNumberOfCircles(currentLevel: Int): Int {
-        return currentLevel + 2
-    }
+    private fun getNumberOfCircles(currentLevel: Int) = currentLevel + 2
 
-    fun isLevelComplete(): Boolean = circles.size == 0
+    fun isLevelComplete() = circles.size == 0
 
     fun currentCircle(): CircleModelWrapper = circles[0]
 

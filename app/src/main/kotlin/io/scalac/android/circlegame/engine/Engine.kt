@@ -9,6 +9,7 @@ import timber.log.Timber
 import kotlin.properties.Delegates
 
 class Engine(val circleModelStorage: CircleModelStorage) : Handler.Callback {
+
     init {
         Timber.plant(Timber.DebugTree())
     }
@@ -18,7 +19,7 @@ class Engine(val circleModelStorage: CircleModelStorage) : Handler.Callback {
 
     var points = 0
     var engineView: EngineView? = null
-    var lives = LIVES
+    var lives = LIVES_COUNT
 
     var currentLevel: Int by Delegates.observable(1, {
         _, _, newValue ->
@@ -81,8 +82,8 @@ class Engine(val circleModelStorage: CircleModelStorage) : Handler.Callback {
         return true
     }
 
-    private fun scheduleHideCurrentCircle(currentCircle: CircleModel, circleWrapper: CircleModelWrapper,
-                                          currentCircleHideTime: Long) {
+    private fun scheduleHideCurrentCircle(
+            currentCircle: CircleModel, circleWrapper: CircleModelWrapper, currentCircleHideTime: Long) {
 
         val onCircleSustainEndRunnable = Runnable {
             if (didUserMissCircle(currentCircle)) { // User missed circle ;(
@@ -102,10 +103,12 @@ class Engine(val circleModelStorage: CircleModelStorage) : Handler.Callback {
 
     private fun onCircleMissed(circleWrapper: CircleModelWrapper) {
         Timber.d("onCircleMissed " + lives)
+
         points--
         lives--
         engineView?.onCircleMissed(circleWrapper.circle)
         circleModelStorage.removeCircle(circleWrapper.circle)
+
         if (lives == 0) {
             stopEngine()
             engineView?.onGameEnded()
@@ -119,11 +122,11 @@ class Engine(val circleModelStorage: CircleModelStorage) : Handler.Callback {
 
     companion object {
         private val SHOW_CIRCLE_MSG = 23
-        private val LIVES = 5
+        private val LIVES_COUNT = 5
     }
 
     fun reset() {
-        lives = LIVES
+        lives = LIVES_COUNT
         points = 0
         currentLevel = 1
         circleModelStorage.reset()

@@ -18,13 +18,13 @@ data class CircleModelStorage(val circleCreator: CircleCreator) {
     }
 
     private fun generateCircles(currentLevel: Int, numberOfCircles: Int) = (0..numberOfCircles).mapTo(circles) {
-        val circle = circleCreator.createCircleForLevel(it.toLong(), currentLevel)
-        circleMap.put(circle.circle, circle)
-        Timber.d("added circle: " + circle.toString())
-        circle
+        val result = circleCreator.createCircleForLevel(it.toLong(), currentLevel)
+        circleMap.put(result.circle, result)
+        Timber.d("added circle: " + result.toString())
+        result
     }
 
-    private fun getNumberOfCircles(currentLevel: Int) = currentLevel + 2
+    private fun getNumberOfCircles(currentLevel: Int) = currentLevel + 4
 
     fun isLevelComplete() = circles.size == 0
 

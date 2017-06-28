@@ -3,15 +3,9 @@ package io.scalac.android.circlegame.ui
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import io.scalac.android.circlegame.R
-import io.scalac.android.circlegame.engine.CircleCreator
-import io.scalac.android.circlegame.engine.CircleModelStorage
-import io.scalac.android.circlegame.engine.Engine
-import io.scalac.android.circlegame.engine.EngineView
+import io.scalac.android.circlegame.engine.*
 import io.scalac.android.circlegame.model.CircleModel
 
 class MainActivity : AppCompatActivity(), EngineView {
@@ -27,9 +21,11 @@ class MainActivity : AppCompatActivity(), EngineView {
     private val lives: TextView by lazy { findViewById(R.id.lives) as TextView }
     private val retry: View by lazy {
         val retryButton = findViewById(R.id.retry)
-        retryButton.setOnClickListener { view -> engine.reset() }
+        retryButton.setOnClickListener { engine.retry() }
         retryButton
     }
+
+    private val startPauseButton: Button by lazy { findViewById(R.id.start_pause_btn) as Button }
 
     private val circleToViewMap: HashMap<CircleModel, View?> = HashMap()
 
@@ -40,12 +36,12 @@ class MainActivity : AppCompatActivity(), EngineView {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        startPauseButton.setOnClickListener { engine.handleStartPauseClick() }
     }
 
     override fun onResume() {
         super.onResume()
         engine.engineView = this
-        engine.startEngine()
         updateTexts()
     }
 
@@ -104,6 +100,20 @@ class MainActivity : AppCompatActivity(), EngineView {
     override fun onGameStarted() = runOnUiThread {
         retry.visibility = View.GONE
         updateTexts()
+    }
+
+    override fun onGameStateChanged(newState: GameState) = runOnUiThread {
+        when (newState) {
+            GameState.PAUSED -> {
+                startPauseButton.text = "RESUME"
+            }
+            GameState.RUNNING -> {
+                startPauseButton.text = "PAUSE"
+            }
+            GameState.STOPPED -> {
+                startPauseButton.text = "START"
+            }
+        }
     }
 
     private fun removeCircleFromView(circle: CircleModel) {

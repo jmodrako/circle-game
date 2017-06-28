@@ -8,4 +8,5 @@ interface EngineView : LevelChangedListener {
     fun onLevelCompleted()
     fun onGameEnded()
     fun onGameStarted()
+    fun onGameStateChanged(newState: GameState)
 }

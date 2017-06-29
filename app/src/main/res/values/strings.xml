@@ -6,4 +6,5 @@
     <string name="retry">Retry</string>
     <string name="game_ended">Game ended.</string>
     <string name="level_up">Level up!</string>
+    <string name="save_score">Save score</string>
 </resources>

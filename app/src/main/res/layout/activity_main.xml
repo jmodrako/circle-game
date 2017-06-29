@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/container"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+             android:id="@+id/container"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,7 +16,7 @@
             android:layout_margin="14dp"
             android:text="@string/level"
             android:textColor="@color/colorAccent"
-            android:textSize="22sp" />
+            android:textSize="22sp"/>
 
         <TextView
             android:id="@+id/level"
@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="14dp"
             android:textColor="@color/colorAccent"
-            android:textSize="22sp" />
+            android:textSize="22sp"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -32,7 +32,7 @@
             android:layout_margin="14dp"
             android:text="@string/points"
             android:textColor="@color/colorAccent"
-            android:textSize="22sp" />
+            android:textSize="22sp"/>
 
         <TextView
             android:id="@+id/points"
@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="14dp"
             android:textColor="@color/colorAccent"
-            android:textSize="22sp" />
+            android:textSize="22sp"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -48,7 +48,7 @@
             android:layout_margin="14dp"
             android:text="@string/lives"
             android:textColor="@color/colorAccent"
-            android:textSize="22sp" />
+            android:textSize="22sp"/>
 
         <TextView
             android:id="@+id/lives"
@@ -56,7 +56,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="14dp"
             android:textColor="@color/colorAccent"
-            android:textSize="22sp" />
+            android:textSize="22sp"/>
     </LinearLayout>
 
     <Button
@@ -65,11 +65,18 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="@string/retry"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
     <Button
         android:id="@+id/start_pause_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"/>
+
+    <Button
+        android:id="@+id/high_score"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:text="HIGH SCORES"/>
 </FrameLayout>

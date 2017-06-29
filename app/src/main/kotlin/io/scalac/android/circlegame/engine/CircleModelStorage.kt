@@ -20,7 +20,7 @@ data class CircleModelStorage(val circleCreator: CircleCreator) {
     private fun generateCircles(currentLevel: Int, numberOfCircles: Int) = (0..numberOfCircles).mapTo(circles) {
         val result = circleCreator.createCircleForLevel(it.toLong(), currentLevel)
         circleMap.put(result.circle, result)
-        Timber.d("added circle: " + result.toString())
+        Timber.d("generateCircles: " + result.toString())
         result
     }
 

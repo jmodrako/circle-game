@@ -50,10 +50,13 @@ class Engine(val circleModelStorage: CircleModelStorage) : Handler.Callback {
 
     fun onCircleClicked(circle: CircleModel) = logInvocation("onCircleClicked") {
         if (gameState == GameState.RUNNING) {
-            val currentCircle = circleModelStorage.currentCircle()
-            points += currentLevel
-            circleModelStorage.removeCircle(circle)
-            continueGame(currentCircle)
+            logInvocation("onCircleClicked.insideIf") {
+
+                val currentCircle = circleModelStorage.currentCircle()
+                points += currentLevel
+                circleModelStorage.removeCircle(circle)
+                continueGame(currentCircle)
+            }
         }
     }
 
@@ -102,18 +105,15 @@ class Engine(val circleModelStorage: CircleModelStorage) : Handler.Callback {
     private fun continueGame(currentCircle: CircleModelWrapper) {
         if (circleModelStorage.isLevelComplete()) {
             onLevelCompleted()
-        } else {
-            workerHandler.sendEmptyMessageDelayed(NEXT_GAME_FRAME_MSG, currentCircle.nextDelayMs)
         }
+
+        workerHandler.sendEmptyMessageDelayed(NEXT_GAME_FRAME_MSG, currentCircle.nextDelayMs)
     }
 
     private fun onLevelCompleted() {
-        stopEngine()
         levelUp()
         circleModelStorage.levelUp(currentLevel)
         engineView?.onLevelCompleted()
-
-        startEngine()
     }
 
     private fun levelUp() = logInvocation("levelUp") {
@@ -161,11 +161,11 @@ class Engine(val circleModelStorage: CircleModelStorage) : Handler.Callback {
         circleModelStorage.removeCircle(circleWrapper.circle)
 
         if (lives == 0 || circleModelStorage.isLevelComplete()) {
+            stopEngine()
+            engineView?.onGameEnded(points)
+
             lives = 0
             points = 0
-
-            stopEngine()
-            engineView?.onGameEnded()
         } else {
             workerHandler.sendEmptyMessageDelayed(NEXT_GAME_FRAME_MSG, circleWrapper.nextDelayMs)
         }

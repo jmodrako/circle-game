@@ -1,6 +1,5 @@
 package io.scalac.android.circlegame.ui
 
-import android.content.DialogInterface
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
@@ -103,12 +102,12 @@ class MainActivity : AppCompatActivity(), EngineView {
         updateTexts()
     }
 
-    override fun onGameEnded() = runOnUiThread {
+    override fun onGameEnded(points: Int) = runOnUiThread {
         updateTexts()
         retry.visibility = View.VISIBLE
         Toast.makeText(this, R.string.game_ended, Toast.LENGTH_LONG).show()
 
-        showSaveScoreDialog(engine.points)
+        showSaveScoreDialog(points)
     }
 
     private fun showSaveScoreDialog(score: Int) {

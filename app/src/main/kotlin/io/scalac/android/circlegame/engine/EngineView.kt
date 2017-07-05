@@ -6,4 +6,7 @@ interface EngineView : LevelChangedListener {
     fun onShowCircle(circle: CircleModel)
     fun onCircleMissed(circleModel: CircleModel)
     fun onLevelCompleted()
+    fun onGameEnded(points: Int)
+    fun onGameStarted()
+    fun onGameStateChanged(newState: GameState)
 }

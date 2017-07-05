@@ -2,6 +2,7 @@ package io.scalac.android.circlegame.engine
 
 import io.scalac.android.circlegame.model.CircleModel
 import timber.log.Timber
+import java.util.Random
 
 data class CircleModelStorage(val circleCreator: CircleCreator) {
 
@@ -45,5 +46,12 @@ data class CircleModelStorage(val circleCreator: CircleCreator) {
 
     companion object {
         val INITIAL_LEVEL = 1
+    }
+
+    fun reshuffleCurrentCircle(currentLevel: Int) {
+        removeCircle(circles[0].circle)
+        val newCircle = circleCreator.createCircleForLevel(Random().nextLong(), currentLevel)
+        circleMap.put(newCircle.circle, newCircle)
+        circles.add(0, newCircle)
     }
 }

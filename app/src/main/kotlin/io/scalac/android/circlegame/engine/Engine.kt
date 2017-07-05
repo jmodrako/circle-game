@@ -91,6 +91,10 @@ class Engine(val circleModelStorage: CircleModelStorage) : Handler.Callback {
     internal fun pauseEngine() = logInvocation("pauseEngine") {
         workerHandler.removeMessages(NEXT_GAME_FRAME_MSG)
         workerHandler.removeMessages(HIDE_CURRENT_CIRCLE_MSG)
+
+        val currentCircle = circleModelStorage.currentCircle().circle
+        circleModelStorage.reshuffleCurrentCircle(currentLevel)
+        engineView?.onRemoveCircle(currentCircle)
     }
 
     internal fun resumeEngine() = logInvocation("resumeEngine") {
@@ -154,18 +158,20 @@ class Engine(val circleModelStorage: CircleModelStorage) : Handler.Callback {
         engineView?.onShowCircle(circleToShow)
     }
 
-    private fun onCircleMissed(circleWrapper: CircleModelWrapper) = logInvocation("onCircleMissed " + lives) {
-        points--
+    private fun onCircleMissed(circleWrapper: CircleModelWrapper) = logInvocation("onRemoveCircle " + lives) {
         lives--
-        engineView?.onCircleMissed(circleWrapper.circle)
+        engineView?.onRemoveCircle(circleWrapper.circle)
         circleModelStorage.removeCircle(circleWrapper.circle)
 
-        if (lives == 0 || circleModelStorage.isLevelComplete()) {
+        if (lives == 0) {
             stopEngine()
             engineView?.onGameEnded(points)
 
             lives = 0
             points = 0
+        } else if (circleModelStorage.isLevelComplete()) {
+            circleModelStorage.removeCircle(circleWrapper.circle)
+            continueGame(circleWrapper)
         } else {
             workerHandler.sendEmptyMessageDelayed(NEXT_GAME_FRAME_MSG, circleWrapper.nextDelayMs)
         }

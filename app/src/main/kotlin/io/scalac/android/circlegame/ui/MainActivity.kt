@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity(), EngineView {
     }
 
     override fun onPause() {
-        engine.stopEngine()
+        engine.pauseEngine()
         engine.engineView = null
         super.onPause()
     }
@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity(), EngineView {
         level.text = engine.currentLevel.toString()
     }
 
-    override fun onCircleMissed(circleModel: CircleModel) = runOnUiThread {
+    override fun onRemoveCircle(circleModel: CircleModel) = runOnUiThread {
         removeCircleFromView(circleModel)
         updateTexts()
     }
